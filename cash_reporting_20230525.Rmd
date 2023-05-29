@@ -200,10 +200,12 @@ sum_stats <- cbr  %>%
             communities = n_distinct(admin4pcode), 
             households = sum(families[previously_assisted == "No"], na.rm = TRUE), 
             beneficiaries = sum(beneficiaries[previously_assisted == "No"], na.rm = TRUE), 
+            sub_districts = n_distinct(admin3pcode), 
             total_usd = sum(total_usd, na.rm = TRUE), 
             .groups = "drop")
 
 ```
+
 
 
 <br><br><br>
@@ -213,7 +215,7 @@ sum_stats <- cbr  %>%
 
 As of **`r report_date`**, a total of **`r sum_stats %>% pull(beneficiaries) %>% format(big.mark = ",")`** persons or **`r sum_stats %>% pull(households) %>% format(big.mark = ",")`** families have been reached by MPC interventions. 
 
-A total of USD **`r paste(format(round((sum_stats %>% pull(total_usd)) / 1000000, 1), trim = TRUE), "million")`** has been disbursed by **`r sum_stats %>% pull(partners)`** implementing agencies across **`r cbr %>% filter(project_status == "Completed") %>% summarise(n_distinct(admin3pcode)) %>% pull()`** sub-districts. 
+A total of USD **`r paste(format(round((sum_stats %>% pull(total_usd)) / 1000000, 1), trim = TRUE), "million")`** has been disbursed by **`r sum_stats %>% pull(partners)`** implementing agencies in **`r sum_stats %>% pull(communities)`** communities across **`r sum_stats %>% pull(sub_districts)`** sub-districts. 
 
 *Only beneficiaries who have received at least USD 100/family/month have been included; excludes sector-based activities such as non-MPC cash-for-food.*
 
@@ -261,7 +263,7 @@ cbr  %>%
 
 <br>
 
-`r filter(cbr, month == 2 & project_status == "Completed" & str_detect(cluster, "Multipurpose")) %>% {sum(.$beneficiaries, na.rm = TRUE)} %>% format(big.mark = ",")` beneficiary frequencies were reached in February 2023 and `r filter(cbr, month == 3 & project_status == "Completed" & str_detect(cluster, "Multipurpose")) %>% {sum(.$beneficiaries, na.rm = TRUE)} %>% format(big.mark = ",")` were reached in March 2023. `r filter(cbr, month == 4 & project_status == "Completed" & str_detect(cluster, "Multipurpose")) %>% {sum(.$beneficiaries, na.rm = TRUE)} %>% format(big.mark = ",")` have been reached so far in April 2023.
+`r filter(cbr, month == 2 & project_status == "Completed" & str_detect(cluster, "Multipurpose")) %>% {sum(.$beneficiaries, na.rm = TRUE)} %>% format(big.mark = ",")` beneficiary frequencies were reached in February 2023 and `r filter(cbr, month == 3 & project_status == "Completed" & str_detect(cluster, "Multipurpose")) %>% {sum(.$beneficiaries, na.rm = TRUE)} %>% format(big.mark = ",")` were reached in March 2023. `r filter(cbr, month == 4 & project_status == "Completed" & str_detect(cluster, "Multipurpose")) %>% {sum(.$beneficiaries, na.rm = TRUE)} %>% format(big.mark = ",")` were reached in April 2023 and `r filter(cbr, month == 5 & project_status == "Completed" & str_detect(cluster, "Multipurpose")) %>% {sum(.$beneficiaries, na.rm = TRUE)} %>% format(big.mark = ",")` have been reached in May 2023. 
 
 *This document distinguishes between beneficiaries, or unique individuals reached, and beneficiary frequencies, or the number of times people have been reached, inclusive of double counting.*
 
@@ -353,6 +355,12 @@ The small number of beneficiaries reached earlier than February all pertained to
 ```{r plotly-planned-implemented-map, fig.height=7}
 
 planned_implemented_map <- cbr %>% 
+  # There really was only one partner that reported 
+  # ongoing activities. This should change in the future. 
+  # Most of the activities were largely one-off. 
+  # Or consider using the dates to indicate which activities were ongoing
+  mutate(project_status = recode(project_status, 
+                                 "Ongoing" = "Completed")) %>% 
   right_join(pcode3_shape, 
              by = c("admin3pcode" = "ADM3_PCODE")) %>% 
   filter(ADM1_PCODE %in% c("SY02", "SY07", "SY11") & !is.na(beneficiaries)) %>% 
@@ -411,7 +419,7 @@ cbr %>%
   summarise(beneficiaries = sum(beneficiaries, na.rm = TRUE)) %>% 
   mutate(district = fct_reorder(district, beneficiaries),
          governorate = fct_relevel(governorate, 
-                                   c("Idleb", "Ar-Raqqa", "Aleppo"))
+                                   c("Idleb", "Ar-Raqqa", "Deir-Ez-Zor", "Aleppo"))
          ) %>% 
   ggplot(aes(x = beneficiaries, y = district)) + 
   geom_col(aes(fill = governorate)) + 
@@ -425,7 +433,7 @@ cbr %>%
 
 hno %>% 
   filter(admin2name_en %in% c("Harim", "Idleb", "Jisr-Ash-Shugur", "Ariha", 
-                              "Tell Abiad",  
+                              "Tell Abiad",  "Deir-ez-Zor",
                               "Afrin", "Jebel Saman", "A'zaz", "Jarablus", "Al Bab")) %>% 
   group_by(governorate = admin1name_en, district = admin2name_en) %>% 
   summarise(total_population = sum(total_population, na.rm = TRUE), 
@@ -445,7 +453,8 @@ hno %>%
                                 "A'zaz", 
                                 "Jebel Saman", 
                                 "Afrin", 
-                                "Tell Abiad", 
+                                "Tell Abiad",
+                                "Deir-ez-Zor",
                                 "Ariha", 
                                 "Jisr-Ash-Shugur", 
                                 "Idleb", 
@@ -551,7 +560,7 @@ avg_pc_reached <- cbr %>%
   # I forgot why I was doing this
   left_join(hno %>% 
               filter(admin2name_en %in% c("Harim", "Idleb", "Jisr-Ash-Shugur", "Ariha", 
-                              "Tell Abiad",  
+                              "Tell Abiad",  "Deir-ez-Zor",
                               "Afrin", "Jebel Saman", "A'zaz", "Jarablus", "Al Bab")) %>%
               group_by(admin1name_en, admin3pcode) %>%
               summarise(total_population = sum(total_population, na.rm = TRUE),
@@ -630,7 +639,7 @@ cbr %>%
                 .groups = "drop") %>% 
   left_join(hno %>% 
               filter(admin2name_en %in% c("Harim", "Idleb", "Jisr-Ash-Shugur", "Ariha", 
-                              "Tell Abiad",  
+                              "Tell Abiad",  "Deir-ez-Zor",
                               "Afrin", "Jebel Saman", "A'zaz", "Jarablus", "Al Bab")) %>%
               group_by(admin1name_en, admin3pcode) %>%
               summarise(total_population = sum(total_population, na.rm = TRUE),
@@ -777,7 +786,7 @@ eq %>%
        y = "Wounded and dead per 100k", 
        title = "Intensity of earthquake impacts by sub-district", 
        subtitle = "Size shows number of damaged houses and colour shows beneficiaries", 
-       size = "Damaged/\nhouses", 
+       size = "Damaged\nhouses", 
        colour = "Beneficiaries", 
        caption = "Data from CWG, FSL and ACU") + 
   theme(plot.caption = element_text(hjust = .5))

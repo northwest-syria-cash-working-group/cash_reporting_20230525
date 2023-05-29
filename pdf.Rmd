@@ -189,6 +189,8 @@ sum_stats <- cbr  %>%
 
 <br><br><br>
 
+\newpage
+
 # 1. MPC response overview
 
 
@@ -217,6 +219,7 @@ cbr  %>%
   mutate(`%_BNF` = 
            round(beneficiaries / sum(beneficiaries, na.rm = TRUE) * 100, digits = 2), 
          total_usd = round(total_usd)) %>%
+  # The four commas are basically to specify for which rows the total should be calculated
   adorn_totals("row",,,, households, beneficiaries, total_usd, `%_BNF`) %>% 
   mutate(`%_BNF` = ifelse(`%_BNF` > 99.98, 100, `%_BNF`)) %>% 
   select(governorate, district, `comm.` = communities, partners, 
@@ -242,7 +245,7 @@ cbr  %>%
 
 <br>
 
-`r filter(cbr, month == 2 & project_status == "Completed" & str_detect(cluster, "Multipurpose")) %>% {sum(.$beneficiaries, na.rm = TRUE)} %>% format(big.mark = ",")` beneficiary frequencies were reached in February 2023 and `r filter(cbr, month == 3 & project_status == "Completed" & str_detect(cluster, "Multipurpose")) %>% {sum(.$beneficiaries, na.rm = TRUE)} %>% format(big.mark = ",")` were reached in March 2023. `r filter(cbr, month == 4 & project_status == "Completed" & str_detect(cluster, "Multipurpose")) %>% {sum(.$beneficiaries, na.rm = TRUE)} %>% format(big.mark = ",")` have been reached so far in April 2023.
+`r filter(cbr, month == 2 & project_status == "Completed" & str_detect(cluster, "Multipurpose")) %>% {sum(.$beneficiaries, na.rm = TRUE)} %>% format(big.mark = ",")` beneficiary frequencies were reached in February 2023 and `r filter(cbr, month == 3 & project_status == "Completed" & str_detect(cluster, "Multipurpose")) %>% {sum(.$beneficiaries, na.rm = TRUE)} %>% format(big.mark = ",")` were reached in March 2023. `r filter(cbr, month == 4 & project_status == "Completed" & str_detect(cluster, "Multipurpose")) %>% {sum(.$beneficiaries, na.rm = TRUE)} %>% format(big.mark = ",")` were reached in April 2023 and `r filter(cbr, month == 5 & project_status == "Completed" & str_detect(cluster, "Multipurpose")) %>% {sum(.$beneficiaries, na.rm = TRUE)} %>% format(big.mark = ",")` have been reached in May 2023. 
 
 *This document distinguishes between beneficiaries, or unique individuals reached, and beneficiary frequencies, or the number of times people have been reached, inclusive of double counting.*
 
@@ -333,7 +336,7 @@ The small number of beneficiaries reached earlier than February all pertained to
 
 ```{r plotly-planned-implemented-map, fig.height=7}
 
-planned_implemented_map <- cbr %>% 
+cbr %>% 
   right_join(pcode3_shape, 
              by = c("admin3pcode" = "ADM3_PCODE")) %>% 
   filter(ADM1_PCODE %in% c("SY02", "SY07", "SY11") & !is.na(beneficiaries)) %>% 
@@ -363,12 +366,12 @@ planned_implemented_map <- cbr %>%
   guides(size = "none")
 
   
-ggplotly(planned_implemented_map, tooltip = c("text")) %>% 
-  plotly::style(hoveron = "point") %>% 
-  layout(title = list(text = paste0("Communities reached and planned -- CWG partners", 
-                                    "<br>", 
-                                    "<sup>", 
-                                    "Planned in green, completed in purple, size shows number of persons; click and drag to zoom; mouse over for details")))
+# ggplotly(planned_implemented_map, tooltip = c("text")) %>% 
+#   plotly::style(hoveron = "point") %>% 
+#   layout(title = list(text = paste0("Communities reached and planned -- CWG partners", 
+#                                     "<br>", 
+#                                     "<sup>", 
+#                                     "Planned in green, completed in purple, size shows number of persons; click and drag to # zoom; mouse over for details")))
   
 ```
 
@@ -383,6 +386,7 @@ Coverage continues to be highest in Afrin and Harim districts, where the highest
 
 
 
+
 ```{r mpc-by-district, warning = FALSE}
 cbr %>% 
   filter(project_status == "Completed" & 
@@ -392,7 +396,7 @@ cbr %>%
   summarise(beneficiaries = sum(beneficiaries, na.rm = TRUE)) %>% 
   mutate(district = fct_reorder(district, beneficiaries),
          governorate = fct_relevel(governorate, 
-                                   c("Idleb", "Ar-Raqqa", "Aleppo"))
+                                   c("Idleb", "Ar-Raqqa", "Deir-Ez-Zor", "Aleppo"))
          ) %>% 
   ggplot(aes(x = beneficiaries, y = district)) + 
   geom_col(aes(fill = governorate)) + 
@@ -406,7 +410,7 @@ cbr %>%
 
 hno %>% 
   filter(admin2name_en %in% c("Harim", "Idleb", "Jisr-Ash-Shugur", "Ariha", 
-                              "Tell Abiad",  
+                              "Tell Abiad",  "Deir-ez-Zor",
                               "Afrin", "Jebel Saman", "A'zaz", "Jarablus", "Al Bab")) %>% 
   group_by(governorate = admin1name_en, district = admin2name_en) %>% 
   summarise(total_population = sum(total_population, na.rm = TRUE), 
@@ -426,7 +430,8 @@ hno %>%
                                 "A'zaz", 
                                 "Jebel Saman", 
                                 "Afrin", 
-                                "Tell Abiad", 
+                                "Tell Abiad",
+                                "Deir-ez-Zor",
                                 "Ariha", 
                                 "Jisr-Ash-Shugur", 
                                 "Idleb", 
@@ -444,6 +449,7 @@ hno %>%
   
   plot_layout(guides = "collect") & 
   theme(legend.position = "bottom")
+
 
 ggsave("./img/mpc_by_district.png", dpi = 300, height = 8.27, width = 11.69, units = "in")  
 
@@ -532,7 +538,7 @@ avg_pc_reached <- cbr %>%
   # I forgot why I was doing this
   left_join(hno %>% 
               filter(admin2name_en %in% c("Harim", "Idleb", "Jisr-Ash-Shugur", "Ariha", 
-                              "Tell Abiad",  
+                              "Tell Abiad",  "Deir-ez-Zor",
                               "Afrin", "Jebel Saman", "A'zaz", "Jarablus", "Al Bab")) %>%
               group_by(admin1name_en, admin3pcode) %>%
               summarise(total_population = sum(total_population, na.rm = TRUE),
@@ -611,7 +617,7 @@ cbr %>%
                 .groups = "drop") %>% 
   left_join(hno %>% 
               filter(admin2name_en %in% c("Harim", "Idleb", "Jisr-Ash-Shugur", "Ariha", 
-                              "Tell Abiad",  
+                              "Tell Abiad",  "Deir-ez-Zor",
                               "Afrin", "Jebel Saman", "A'zaz", "Jarablus", "Al Bab")) %>%
               group_by(admin1name_en, admin3pcode) %>%
               summarise(total_population = sum(total_population, na.rm = TRUE),
@@ -635,7 +641,9 @@ cbr %>%
   theme(legend.position = "bottom")
 
 ggsave("./img/mpc_by_sub_district.png", dpi = 300, height = 8.27, width = 11.69, units = "in")  
+
 ```
+
 
 <br><br>
 
@@ -758,7 +766,7 @@ eq %>%
        y = "Wounded and dead per 100k", 
        title = "Intensity of earthquake impacts by sub-district", 
        subtitle = "Size shows number of damaged houses and colour shows beneficiaries", 
-       size = "Damaged/\nhouses", 
+       size = "Damaged\nhouses", 
        colour = "Beneficiaries", 
        caption = "Data from CWG, FSL and ACU") + 
   theme(plot.caption = element_text(hjust = .5))
@@ -896,7 +904,7 @@ In the scatterplot below, each point is a single cash working group partner. The
 
 
 ```{r partner-scatter-plotly}
-partner_scatter <- cbr %>% 
+cbr %>% 
    filter(project_status == "Completed") %>% 
   group_by(implementing_partner) %>% 
   summarise(beneficiaries = sum(beneficiaries, na.rm = TRUE), 
@@ -912,13 +920,13 @@ partner_scatter <- cbr %>%
        y = "Communities (admin4) reached", 
        title = "Implementing partners -- beneficiary frequencies and communities reached")
 
-ggplotly(partner_scatter, tooltip = c("text")) %>% 
-  layout(showlegend = TRUE, legend = list(font = (list(size = 6)))) %>% 
-  plotly::style(hoveron = "point") %>% 
-  layout(title = list(text = paste0("Beneficiaries and communities reached",
-                                    "<br>",
-                                    "<sup>",
-                                    "Cash response implementing partners; mouse over for details","</sup>")))
+# ggplotly(partner_scatter, tooltip = c("text")) %>% 
+#   layout(showlegend = TRUE, legend = list(font = (list(size = 6)))) %>% 
+#   plotly::style(hoveron = "point") %>% 
+#   layout(title = list(text = paste0("Beneficiaries and communities reached",
+#                                     "<br>",
+#                                     "<sup>",
+#                                     "Cash response implementing partners; mouse over for details","</sup>")))
 
 
 ```
@@ -966,18 +974,19 @@ currency_table <- cbr %>%
   # doing this entirely for rounding reasons, because of 
   # FX stuff, there's one extra dollar
   mutate(total_usd = ifelse(currency == "USD", total_usd - 1, total_usd)) %>% 
-  mutate(`%_of_total` = round(total_usd / sum(total_usd) * 100, 
+  mutate(pc_total = round(total_usd / sum(total_usd) * 100, 
                               digits = 2))
 ```
 
 
-A total of **`r filter(currency_table, currency == "USD") %>% pull(`%_of_total`)`%** of cash disbursed was in USD. 
+A total of **`r filter(currency_table, currency == "USD") %>% pull(pc_total)`%** of cash disbursed was in USD. 
 
 <br>
 
 
 ```{r table-currency-table}
 currency_table %>% 
+  rename(`%_of_total` = pc_total) %>% 
   adorn_totals("row") %>% 
   flextable() %>% 
   theme_zebra() %>% 
