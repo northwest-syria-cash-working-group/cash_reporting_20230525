@@ -1,0 +1,27 @@
+{
+    "id": "1615BA0A",
+    "path": "~/R/cash_reporting_20230525/pdf.Rmd",
+    "project_path": "pdf.Rmd",
+    "type": "r_markdown",
+    "hash": "0",
+    "contents": "",
+    "dirty": true,
+    "created": 1685290617582.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "tempName": "Untitled1",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "981,38",
+        "scrollLine": "956"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1685306151,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1685343912658,
+    "read_only": false,
+    "read_only_alternatives": []
+}
