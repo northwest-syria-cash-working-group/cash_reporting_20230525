@@ -1,0 +1,70 @@
+"0","cbr %>% 
+  filter(project_status == ""Completed"" & 
+           str_detect(cluster, ""Multipurpose"") & 
+           previously_assisted == ""No"") %>% 
+  filter(!is.na(admin3pcode)) %>% 
+  mutate(sub_district = recode(sub_district, 
+                               ""salqin"" = ""Salqin"", 
+                               ""afrin"" = ""Afrin"")) %>% 
+  group_by(governorate, sub_district) %>% 
+  summarise(beneficiaries = sum(beneficiaries, na.rm = TRUE), 
+            .groups = ""drop"") %>% 
+  arrange(desc(beneficiaries)) %>% 
+  arrange(desc(governorate)) %>% 
+  pull(sub_district)
+"
+"1"," [1]"
+"1"," ""Salqin""         "
+"1"," ""Dana""           "
+"1"," ""Harim""          "
+"1"," ""Idleb""          "
+"1"," ""Maaret Tamsrin"" "
+"1","
+"
+"1"," [6]"
+"1"," ""Armanaz""        "
+"1"," ""Bennsh""         "
+"1"," ""Darkosh""        "
+"1"," ""Qourqeena""      "
+"1"," ""Kafr Takharim""  "
+"1","
+"
+"1","[11]"
+"1"," ""Janudiyeh""      "
+"1"," ""Teftnaz""        "
+"1"," ""Sarmin""         "
+"1"," ""Badama""         "
+"1"," ""Mhambal""        "
+"1","
+"
+"1","[16]"
+"1"," ""Ariha""          "
+"1"," ""Jisr-Ash-Shugur"""
+"1"," ""Ehsem""          "
+"1"," ""Tell Abiad""     "
+"1"," ""Jandairis""      "
+"1","
+"
+"1","[21]"
+"1"," ""Afrin""          "
+"1"," ""Atareb""         "
+"1"," ""Sharan""         "
+"1"," ""Al Bab""         "
+"1"," ""Daret Azza""     "
+"1","
+"
+"1","[26]"
+"1"," ""A'zaz""          "
+"1"," ""Ma'btali""       "
+"1"," ""Aghtrin""        "
+"1"," ""Jarablus""       "
+"1"," ""Suran""          "
+"1","
+"
+"1","[31]"
+"1"," ""Bulbul""         "
+"1"," ""Jebel Saman""    "
+"1"," ""Mare'""          "
+"1"," ""Raju""           "
+"1","
+"
