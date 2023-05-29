@@ -193,6 +193,8 @@ sum_stats <- cbr  %>%
 
 <br><br><br>
 
+\newpage
+
 # 1. MPC response overview
 
 
@@ -236,7 +238,8 @@ cbr  %>%
 #           as_paragraph("Beneficiary figures include only reported MPC with a minimum transfer value #of USD 100")) %>% 
   footnote(i = 1, j = 8, part = "header", ref_symbols = "1",  
            as_paragraph("As percentage of all MPC beneficiaries reached in NW Syria")) %>% 
-  set_table_properties(layout = "autofit", width = .99)
+  set_table_properties(width = .99) %>% 
+  fontsize(size = 8, part = "header")
 
 ```
 
@@ -328,48 +331,13 @@ The small number of beneficiaries reached earlier than February all pertained to
 
 <br><br>
 
+\newpage
+
 # 2. Map of activities
 
+This is a static version of the original interactive plot, which can be accessed [here](https://northwest-syria-cash-working-group.github.io/cash_reporting_20230525/#map-of-activities).
+
 <br>
-
-```{r}
-cbr %>% 
-  # There really was only one partner that reported 
-  # ongoing activities. This should change in the future. 
-  # Most of the activities were largely one-off. 
-  # Or consider using the dates to indicate which activities were ongoing
-  mutate(project_status = recode(project_status, 
-                                 "Ongoing" = "Completed")) %>% 
-  right_join(pcode3_shape, 
-             by = c("admin3pcode" = "ADM3_PCODE")) %>% 
-  filter(ADM1_PCODE %in% c("SY02", "SY07", "SY11") & !is.na(beneficiaries)) %>% 
-  st_as_sf() %>%
-  ggplot() + 
-  geom_sf(size = .1, colour = "grey70") + 
-  geom_point(aes(size = beneficiaries,
-                 colour = project_status, 
-                 x = longitude_x, y = latitude_y, 
-                 text = paste0("sub_district: ", sub_district, "\n",
-                               "community: ", community, "\n",
-                               "location_type: ", village_camps, "\n",
-                               "beneficiaries:", format(beneficiaries, big.mark = ","), "\n",
-                               "partner: ", abbreviation, "\n", 
-                               "lon_x: ", longitude_x, "\n",
-                               "lat_y: ", latitude_y)), 
-             shape = 21, stroke = .35, 
-             alpha = .5) + 
-  scale_size_continuous(labels = comma) + 
-  scale_colour_viridis_d(na.translate = FALSE) + 
-  theme_void() + 
-  theme(plot.background = element_rect(fill = "white", colour = NA), 
-        plot.caption = element_text(hjust = 0.5),) +
-  labs(title = "Communities reached and planned -- CWG partners", 
-       subtitle = "Planned in yellow, completed in purple, size shows number of persons", 
-       colour = "Status") +
-  guides(size = "none")
-
-
-```
 
 
 
@@ -527,10 +495,11 @@ eq %>%
          damaged_houses, damaged_houses_100k) %>% 
   flextable() %>% 
   theme_zebra() %>% 
-  set_table_properties(layout = "autofit", width = .99) %>% 
+  set_table_properties(width = .99) %>% 
   set_caption("Casualties and damaged houses, absolute figures and per 100,000 persons") %>% 
   footnote(part = "header", i = 1, j = 3:6, inline = TRUE, ref_symbols = "1",
-           value = as_paragraph("Data from the Assistance Coordination Unit, Syria 20230328"))
+           value = as_paragraph("Data from the Assistance Coordination Unit, Syria 20230328")) %>% 
+  fontsize(size = 8, part = "header")
 ```
 
 <br>
@@ -554,7 +523,8 @@ cbr %>%
   flextable() %>% 
   set_caption("More than twice as many beneficiaries from villages as from camps") %>% 
   theme_zebra() %>%
-  set_table_properties(layout = "autofit", width = .6)
+  set_table_properties(width = .8) %>% 
+  fontsize(size = 8, part = "header")
   
 ```
 
@@ -832,7 +802,7 @@ cbr %>%
   geom_text(aes(label = comma(beneficiaries)), hjust = "inward") +
   scale_x_continuous(labels = unit_format(unit = "K", scale = 1e-3, accuracy = 1)) + 
   labs(title = "Planned beneficiaries -- Aleppo", 
-       x = "", 
+       x = "Planned beneficiaries", 
        y = "") + 
 
 cbr %>% 
@@ -867,7 +837,8 @@ cbr %>%
   flextable() %>% 
   set_caption("14 partners have reported planned activities") %>%
   theme_zebra() %>%
-  set_table_properties(layout = "autofit", width = .6)
+  set_table_properties(width = .6) %>% 
+  fontsize(size = 8, part = "header")
 ```
 
 <br>
@@ -896,7 +867,8 @@ cbr %>%
   set_caption("Planned beneficiaries by month") %>% 
   footnote(i = 1, j = 1, inline = TRUE, ref_symbols = "1", part = "header",
            value = as_paragraph("Some dates are missing or improperly encoded")) %>% 
-  set_table_properties(layout = "autofit", width = .5)
+  set_table_properties(width = .5) %>% 
+  fontsize(size = 8, part = "header")
 ```
 
 
@@ -923,13 +895,17 @@ cbr %>%
   theme_zebra() %>% 
   set_table_properties(layout = "autofit", width = .99) %>% 
   footnote(as_paragraph("Only partners who provided more than USD 100/family/month"), 
-           i = 1, j = 1, part = "header", inline = TRUE, ref_symbols = "1")
+           i = 1, j = 1, part = "header", inline = TRUE, ref_symbols = "1") %>% 
+  fontsize(size = 8, part = "header")
   
 ```
 
 <br>
 
 In the scatterplot below, each point is a single cash working group partner. The x-axis indicates the number of beneficiary frequencies reached per agency and the y-axis indicates the number of communities (admin4) reached. Mouse over each point for more details.
+
+This is a static version of the original interactive plot, which can be accessed [in this section](https://northwest-syria-cash-working-group.github.io/cash_reporting_20230525/#cash-response-actors-and-cash-disbursed).
+
 
 <br>
 
@@ -985,7 +961,8 @@ cbr %>%
   flextable() %>% 
   set_caption("Cash disbursed and families reached by partner") %>% 
   theme_zebra() %>% 
-  flextable::set_table_properties(layout = "autofit", width = .99)
+  flextable::set_table_properties(width = .99, layout = "autofit") %>% 
+  fontsize(size = 8, part = "header")
 ```
 
 <br>
@@ -1021,7 +998,8 @@ currency_table %>%
   flextable() %>% 
   theme_zebra() %>% 
   set_caption("Proportion of cash disbursed by currency") %>% 
-  set_table_properties(layout = "autofit", width = .6)
+  set_table_properties(width = .6) %>% 
+  fontsize(size = 8, part = "header")
 ```
 
 
@@ -1042,9 +1020,13 @@ Columns include:
 `damaged houses`, `damaged houses per 100k`, 
 `admin3pcode`
 
+This interactive table does not work in a PDF. Please access it online [here](https://northwest-syria-cash-working-group.github.io/cash_reporting_20230525/#interactive-reference-table-at-sub-district-level).
+
 <br>
 
-```{r DT-admin3}
+
+
+```{r DT-admin3, eval=FALSE}
 eq %>% 
   left_join(locations %>% distinct(admin3pcode, 
                                  sub_district = admin3name_en,
