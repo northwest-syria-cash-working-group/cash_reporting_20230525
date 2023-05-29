@@ -1,0 +1,36 @@
+"0","cbr  %>% 
+  filter(project_status == ""Completed"") %>%
+  group_by(governorate, district) %>% 
+  summarise(partners = n_distinct(implementing_partner), 
+            communities = n_distinct(admin4pcode), 
+            households = sum(families, na.rm = TRUE), 
+            beneficiaries = sum(beneficiaries[previously_assisted == ""No""], na.rm = TRUE), 
+            total_usd = sum(total_usd, na.rm = TRUE), 
+            .groups = ""drop"") %>% 
+  ungroup() %>% 
+  mutate(`%_BNF` = 
+           round(beneficiaries / sum(beneficiaries, na.rm = TRUE) * 100, digits = 2), 
+         total_usd = round(total_usd)) %>%
+  adorn_totals(""row"",,,, households, beneficiaries, total_usd, `%_BNF`) %>% 
+  mutate(`%_BNF` = ifelse(`%_BNF` > 99.98, 100, `%_BNF`)) %>% 
+  select(governorate, district, `comm.` = communities, partners, 
+         households, beneficiaries, total_usd, `%_BNF`) %>% 
+  flextable() %>% 
+  set_caption(paste0(
+    round(sum_stats$beneficiaries, digits = -3) %>% format(big.mark = "",""),
+    "" people reached with MPC, USD "",
+    paste(format(round((sum_stats %>% pull(total_usd)) / 1000000, 1), trim = TRUE), ""million""), 
+    "" disbursed, "", 
+    report_date)) %>% 
+  theme_zebra() %>% 
+#  footnote(i = 1, j = 6, part = ""header"", ref_symbols = ""a"",
+#           as_paragraph(""Beneficiary figures include only reported MPC with a minimum transfer value #of USD 100"")) %>% 
+  footnote(i = 1, j = 8, part = ""header"", ref_symbols = ""1"",  
+           as_paragraph(""As percentage of all MPC beneficiaries reached in NW Syria"")) %>% 
+  set_table_properties(layout = ""autofit"", width = 1) %>% 
+  save_as_image(path = ""./img/summary_table.png"")
+"
+"1","[1]"
+"1"," ""./img/summary_table.png"""
+"1","
+"

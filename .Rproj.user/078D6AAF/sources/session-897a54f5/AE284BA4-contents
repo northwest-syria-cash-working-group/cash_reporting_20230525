@@ -257,6 +257,41 @@ cbr  %>%
            as_paragraph("As percentage of all MPC beneficiaries reached in NW Syria")) %>% 
   set_table_properties(layout = "autofit", width = 1)
 
+
+```
+
+```{r summary-table-print, eval=FALSE}
+cbr  %>% 
+  filter(project_status == "Completed") %>%
+  group_by(governorate, district) %>% 
+  summarise(partners = n_distinct(implementing_partner), 
+            communities = n_distinct(admin4pcode), 
+            households = sum(families, na.rm = TRUE), 
+            beneficiaries = sum(beneficiaries[previously_assisted == "No"], na.rm = TRUE), 
+            total_usd = sum(total_usd, na.rm = TRUE), 
+            .groups = "drop") %>% 
+  ungroup() %>% 
+  mutate(`%_BNF` = 
+           round(beneficiaries / sum(beneficiaries, na.rm = TRUE) * 100, digits = 2), 
+         total_usd = round(total_usd)) %>%
+  adorn_totals("row",,,, households, beneficiaries, total_usd, `%_BNF`) %>% 
+  mutate(`%_BNF` = ifelse(`%_BNF` > 99.98, 100, `%_BNF`)) %>% 
+  select(governorate, district, `comm.` = communities, partners, 
+         households, beneficiaries, total_usd, `%_BNF`) %>% 
+  flextable() %>% 
+  set_caption(paste0(
+    round(sum_stats$beneficiaries, digits = -3) %>% format(big.mark = ","),
+    " people reached with MPC, USD ",
+    paste(format(round((sum_stats %>% pull(total_usd)) / 1000000, 1), trim = TRUE), "million"), 
+    " disbursed, ", 
+    report_date)) %>% 
+  theme_zebra() %>% 
+#  footnote(i = 1, j = 6, part = "header", ref_symbols = "a",
+#           as_paragraph("Beneficiary figures include only reported MPC with a minimum transfer value #of USD 100")) %>% 
+  footnote(i = 1, j = 8, part = "header", ref_symbols = "1",  
+           as_paragraph("As percentage of all MPC beneficiaries reached in NW Syria")) %>% 
+  set_table_properties(layout = "autofit", width = 1) %>% 
+  save_as_image(path = "./img/summary_table.png")
 ```
 
 
@@ -348,45 +383,6 @@ The small number of beneficiaries reached earlier than February all pertained to
 # 2. Map of activities
 
 <br>
-
-```{r}
-cbr %>% 
-  # There really was only one partner that reported 
-  # ongoing activities. This should change in the future. 
-  # Most of the activities were largely one-off. 
-  # Or consider using the dates to indicate which activities were ongoing
-  mutate(project_status = recode(project_status, 
-                                 "Ongoing" = "Completed")) %>% 
-  right_join(pcode3_shape, 
-             by = c("admin3pcode" = "ADM3_PCODE")) %>% 
-  filter(ADM1_PCODE %in% c("SY02", "SY07", "SY11") & !is.na(beneficiaries)) %>% 
-  st_as_sf() %>%
-  ggplot() + 
-  geom_sf(size = .1, colour = "grey70") + 
-  geom_point(aes(size = beneficiaries,
-                 colour = project_status, 
-                 x = longitude_x, y = latitude_y, 
-                 text = paste0("sub_district: ", sub_district, "\n",
-                               "community: ", community, "\n",
-                               "location_type: ", village_camps, "\n",
-                               "beneficiaries:", format(beneficiaries, big.mark = ","), "\n",
-                               "partner: ", abbreviation, "\n", 
-                               "lon_x: ", longitude_x, "\n",
-                               "lat_y: ", latitude_y)), 
-             shape = 21, stroke = .35, 
-             alpha = .5) + 
-  scale_size_continuous(labels = comma) + 
-  scale_colour_viridis_d(na.translate = FALSE) + 
-  theme_void() + 
-  theme(plot.background = element_rect(fill = "white", colour = NA), 
-        plot.caption = element_text(hjust = 0.5),) +
-  labs(title = "Communities reached and planned -- CWG partners", 
-       subtitle = "Planned in yellow, completed in purple, size shows number of persons", 
-       colour = "Status") +
-  guides(size = "none")
-
-
-```
 
 
 
